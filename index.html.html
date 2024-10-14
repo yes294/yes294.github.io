@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing App: Roman Economics and Trade</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather&family=Roboto&family=Open+Sans&family=Lato&family=Poppins&family=Montserrat&family=Raleway&family=Noto+Sans&family=Ubuntu&family=Playfair+Display&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --correct-color: #37ac3b;
+            --incorrect-color: #cf29e6;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        body {
+            font-family: 'Merriweather', serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            padding-top: 20px;
+        }
+        #text-display {
+            font-size: 40px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            text-align: left;
+            max-width: 800px;
+            padding: 20px;
+            margin-bottom: 20px;
+            font-variant-ligatures: none;
+            font-feature-settings: "liga" 0;
+        }
+        .correct {
+            color: var(--correct-color);
+        }
+        .incorrect {
+            color: var(--incorrect-color);
+        }
+        .highlight-correct {
+            background-color: rgba(55, 172, 59, 0.2);
+        }
+        .highlight-incorrect {
+            background-color: rgba(207, 41, 230, 0.2);
+        }
+        #score-display {
+            font-size: 30px;
+            text-align: center;
+        }
+        .cursor {
+            border-bottom: 2px solid white;
+        }
+        #settings {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        #settings-content {
+            background-color: #2c2c2c;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-right: 10px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .setting-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            background-color: #1e1e1e;
+            border-radius: 20px;
+            padding: 5px;
+        }
+        .control-group button {
+            background-color: #2c2c2c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .control-group button:hover {
+            background-color: #3c3c3c;
+        }
+        .control-group button:first-child {
+            border-top-left-radius: 15px;
+            border-bottom-left-radius: 15px;
+        }
+        .control-group button:last-child {
+            border-top-right-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+        .control-group span {
+            margin: 0 15px;
+            font-size: 16px;
+            min-width: 60px;
+            text-align: center;
+        }
+        #script-length-control {
+            display: flex;
+            align-items: center;
+            background-color: #1e1e1e;
+            border-radius: 20px;
+            padding: 5px;
+        }
+        #script-length-control button {
+            background-color: #2c2c2c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        #script-length-control button:hover {
+            background-color: #3c3c3c;
+        }
+        #script-length-control button:first-child {
+            border-top-left-radius: 15px;
+            border-bottom-left-radius: 15px;
+        }
+        #script-length-control button:last-child {
+            border-top-right-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+        #script-length-display {
+            margin: 0 15px;
+            font-size: 16px;
+            min-width: 60px;
+            text-align: center;
+        }
+        #font-selector {
+            width: 100%;
+            padding: 5px;
+            margin-top: 5px;
+            background-color: #2c2c2c;
+            color: #ffffff;
+            border: 1px solid #444;
+            border-radius: 4px;
+        }
+        input[type="color"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 40px;
+            height: 40px;
+            background-color: transparent;
+            border: 2px solid #000000;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+        input[type="color"]::-moz-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div id="text-display"></div>
+    <div id="score-display"></div>
+    <div id="settings" style="display: none;">
+        <div id="settings-content">
+            <h2>Settings</h2>
+            <div class="setting-item">
+                <label class="switch">
+                    <input type="checkbox" id="cursor-toggle">
+                    <span class="slider"></span>
+                </label>
+                <span>Show cursor</span>
+            </div>
+            <div class="setting-item">
+                <label class="switch">
+                    <input type="checkbox" id="highlight-toggle">
+                    <span class="slider"></span>
+                </label>
+                <span>Highlight correct/incorrect</span>
+            </div>
+            <div class="setting-item">
+                <span>Script length: </span>
+                <div id="script-length-control">
+                    <button id="decrease-length">-</button>
+                    <span id="script-length-display">100%</span>
+                    <button id="increase-length">+</button>
+                </div>
+            </div>
+            <div class="setting-item">
+                <span>Font size: </span>
+                <div id="font-size-control" class="control-group">
+                    <button id="decrease-font-size">-</button>
+                    <span id="font-size-display">16px</span>
+                    <button id="increase-font-size">+</button>
+                </div>
+            </div>
+            <div class="setting-item">
+                <span>Font: </span>
+                <select id="font-selector">
+                    <option value="Merriweather">Merriweather</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Open Sans">Open Sans</option>
+                    <option value="Lato">Lato</option>
+                    <option value="Poppins">Poppins</option>
+                    <option value="Montserrat">Montserrat</option>
+                    <option value="Raleway">Raleway</option>
+                    <option value="Noto Sans">Noto Sans</option>
+                    <option value="Ubuntu">Ubuntu</option>
+                    <option value="Playfair Display">Playfair Display</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <span>Correct letter color: </span>
+                <input type="color" id="correct-color" value="#37ac3b">
+            </div>
+            <div class="setting-item">
+                <span>Incorrect letter color: </span>
+                <input type="color" id="incorrect-color" value="#cf29e6">
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts.js"></script>
+    <script>
+        let currentIndex = 0;
+        let currentScriptIndex = 0;
+        let lines;
+        let textToType;
+        let incorrectAttempts = [];
+        let totalCorrect = 0;
+        let totalIncorrect = 0;
+        let isScriptCompleted = false;
+        let showCursor = false;
+        let highlightLetters = false;
+        let scriptLengthMultiplier = 1;
+        let currentFont = 'Merriweather';
+        let correctColor = '#37ac3b';
+        let incorrectColor = '#cf29e6';
+        let currentFontSize = 16; // Default font size
+        let startTime;
+        let endTime;
+        let totalCharactersTyped = 0;
+
+        const textDisplay = document.getElementById('text-display');
+        const scoreDisplay = document.getElementById('score-display');
+        const settingsPanel = document.getElementById('settings');
+        const cursorToggle = document.getElementById('cursor-toggle');
+        const highlightToggle = document.getElementById('highlight-toggle');
+        const decreaseLengthButton = document.getElementById('decrease-length');
+        const increaseLengthButton = document.getElementById('increase-length');
+        const scriptLengthDisplay = document.getElementById('script-length-display');
+        const fontSelector = document.getElementById('font-selector');
+        const correctColorPicker = document.getElementById('correct-color');
+        const incorrectColorPicker = document.getElementById('incorrect-color');
+        const decreaseFontSizeButton = document.getElementById('decrease-font-size');
+        const increaseFontSizeButton = document.getElementById('increase-font-size');
+        const fontSizeDisplay = document.getElementById('font-size-display');
+
+        function loadSettings() {
+            const savedShowCursor = localStorage.getItem('showCursor');
+            const savedHighlightLetters = localStorage.getItem('highlightLetters');
+            const savedScriptLengthMultiplier = localStorage.getItem('scriptLengthMultiplier');
+            const savedFont = localStorage.getItem('currentFont');
+            const savedCorrectColor = localStorage.getItem('correctColor');
+            const savedIncorrectColor = localStorage.getItem('incorrectColor');
+            const savedFontSize = localStorage.getItem('fontSize');
+            if (savedShowCursor !== null) {
+                showCursor = JSON.parse(savedShowCursor);
+                cursorToggle.checked = showCursor;
+            }
+            if (savedHighlightLetters !== null) {
+                highlightLetters = JSON.parse(savedHighlightLetters);
+                highlightToggle.checked = highlightLetters;
+            }
+            if (savedScriptLengthMultiplier !== null) {
+                scriptLengthMultiplier = parseFloat(savedScriptLengthMultiplier);
+                updateScriptLengthDisplay();
+            }
+            if (savedFont) {
+                currentFont = savedFont;
+                fontSelector.value = currentFont;
+                document.body.style.fontFamily = currentFont;
+            }
+            if (savedCorrectColor) {
+                correctColor = savedCorrectColor;
+                correctColorPicker.value = correctColor;
+            }
+            if (savedIncorrectColor) {
+                incorrectColor = savedIncorrectColor;
+                incorrectColorPicker.value = incorrectColor;
+            }
+            if (savedFontSize) {
+                currentFontSize = parseInt(savedFontSize);
+                updateFontSize();
+            }
+            updateColors();
+        }
+
+        function saveSettings() {
+            localStorage.setItem('showCursor', JSON.stringify(showCursor));
+            localStorage.setItem('highlightLetters', JSON.stringify(highlightLetters));
+            localStorage.setItem('scriptLengthMultiplier', scriptLengthMultiplier.toString());
+            localStorage.setItem('currentFont', currentFont);
+            localStorage.setItem('correctColor', correctColor);
+            localStorage.setItem('incorrectColor', incorrectColor);
+            localStorage.setItem('fontSize', currentFontSize.toString());
+        }
+
+        function updateScriptLengthDisplay() {
+            scriptLengthDisplay.textContent = `${scriptLengthMultiplier * 100}%`;
+        }
+
+        function updateColors() {
+            document.documentElement.style.setProperty('--correct-color', correctColor);
+            document.documentElement.style.setProperty('--incorrect-color', incorrectColor);
+        }
+
+        function updateFontSize() {
+            textDisplay.style.fontSize = `${currentFontSize}px`;
+            fontSizeDisplay.textContent = `${currentFontSize}px`;
+        }
+
+        function chooseRandomScript() {
+            currentScriptIndex = Math.floor(Math.random() * scripts.length);
+            let fullScript = scripts[currentScriptIndex];
+            
+            if (scriptLengthMultiplier === 2) {
+                let secondScriptIndex;
+                do {
+                    secondScriptIndex = Math.floor(Math.random() * scripts.length);
+                } while (secondScriptIndex === currentScriptIndex);
+                
+                fullScript += ' ' + scripts[secondScriptIndex];
+            }
+            
+            const words = fullScript.split(' ');
+            const scriptLength = Math.floor(words.length * (scriptLengthMultiplier === 2 ? 1 : scriptLengthMultiplier));
+            textToType = words.slice(0, scriptLength).join(' ');
+            lines = textToType.split('\n').filter(line => line.trim() !== '');
+            currentIndex = 0;
+            incorrectAttempts = [];
+            totalCorrect = 0;
+            totalIncorrect = 0;
+            isScriptCompleted = false;
+            startTime = null;
+            endTime = null;
+            totalCharactersTyped = 0;
+        }
+
+        function initializeText() {
+            textDisplay.innerHTML = lines.map((line, lineIndex) => 
+                `<div id="line-${lineIndex}">${line.split('').map((char, charIndex) => 
+    `<span id="char-${lineIndex}-${charIndex}">${char}</span>`
+).join('')}</div>`
+            ).join('<br>');
+            if (!isScriptCompleted) {
+                scoreDisplay.textContent = '';
+            }
+            updateCursor();
+        }
+
+        function handleInput(e) {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                openSettings();
+                return;
+            }
+
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (settingsPanel.style.display === 'flex') {
+                    closeSettings();
+                    return;
+                }
+            }
+
+            if (e.key === 'Enter' || (e.ctrlKey && e.key === 'r')) {
+                e.preventDefault();
+                closeSettings();
+                chooseRandomScript();
+                initializeText();
+                currentIndex = 0;
+                incorrectAttempts = [];
+                totalCorrect = 0;
+                totalIncorrect = 0;
+                isScriptCompleted = false;
+                scoreDisplay.textContent = '';
+                return;
+            }
+
+            if (settingsPanel.style.display === 'flex') {
+                return;
+            }
+
+            if (currentIndex >= textToType.length || isScriptCompleted) return;
+
+            if (!startTime) {
+                startTime = new Date();
+            }
+
+            const typedChar = e.key;
+            const currentChar = textToType[currentIndex];
+
+            if (typedChar === currentChar) {
+                const charElement = document.getElementById(`char-0-${currentIndex}`);
+                charElement.classList.add('correct');
+                if (highlightLetters) {
+                    charElement.classList.add('highlight-correct');
+                }
+                incorrectAttempts.forEach(() => {
+                    charElement.classList.add('incorrect');
+                    if (highlightLetters) {
+                        charElement.classList.add('highlight-incorrect');
+                    }
+                    totalIncorrect++;
+                });
+                totalCorrect++;
+                totalCharactersTyped++;
+                incorrectAttempts = [];
+                currentIndex++;
+                updateCursor();
+
+                if (currentIndex === textToType.length) {
+                    endTime = new Date();
+                    isScriptCompleted = true;
+                    displayScore();
+                }
+            } else if (e.key.length === 1) {
+                incorrectAttempts.push(typedChar);
+                totalCharactersTyped++;
+            }
+
+            e.preventDefault();
+        }
+
+        function displayScore() {
+            const totalAttempts = totalCorrect + totalIncorrect;
+            if (totalAttempts === 0) {
+                scoreDisplay.textContent = 'Score: 0% | WPM: 0';
+            } else {
+                const scorePercentage = Math.round((totalCorrect / totalAttempts) * 100);
+                const wpm = calculateWPM();
+                scoreDisplay.textContent = `Score: ${scorePercentage}% | WPM: ${wpm}`;
+            }
+            console.log('Score displayed:', scoreDisplay.textContent);
+        }
+
+        function calculateWPM() {
+            const timeInMinutes = (endTime - startTime) / 60000; // Convert milliseconds to minutes
+            const wordsTyped = totalCharactersTyped / 5; // Normalize characters to words
+            const wpm = Math.round(wordsTyped / timeInMinutes);
+            return wpm;
+        }
+
+        function updateCursor() {
+            document.querySelectorAll('.cursor').forEach(el => el.classList.remove('cursor'));
+            if (showCursor && currentIndex < textToType.length) {
+                document.getElementById(`char-0-${currentIndex}`).classList.add('cursor');
+            }
+        }
+
+        function openSettings() {
+            settingsPanel.style.display = 'flex';
+        }
+
+        function closeSettings() {
+            settingsPanel.style.display = 'none';
+        }
+
+        cursorToggle.addEventListener('change', (e) => {
+            showCursor = e.target.checked;
+            updateCursor();
+            saveSettings();
+        });
+
+        highlightToggle.addEventListener('change', (e) => {
+            highlightLetters = e.target.checked;
+            updateHighlights();
+            saveSettings();
+        });
+
+        function updateHighlights() {
+            document.querySelectorAll('.highlight-correct, .highlight-incorrect').forEach(el => {
+                el.classList.remove('highlight-correct', 'highlight-incorrect');
+            });
+            if (highlightLetters) {
+                document.querySelectorAll('.correct').forEach(el => el.classList.add('highlight-correct'));
+                document.querySelectorAll('.incorrect').forEach(el => el.classList.add('highlight-incorrect'));
+            }
+        }
+
+        decreaseLengthButton.addEventListener('click', () => {
+            scriptLengthMultiplier = Math.max(0.25, scriptLengthMultiplier / 2);
+            updateScriptLengthDisplay();
+            saveSettings();
+            chooseRandomScript();
+            initializeText();
+        });
+
+        increaseLengthButton.addEventListener('click', () => {
+            scriptLengthMultiplier = Math.min(2, scriptLengthMultiplier * 2);
+            updateScriptLengthDisplay();
+            saveSettings();
+            chooseRandomScript();
+            initializeText();
+        });
+
+        fontSelector.addEventListener('change', (e) => {
+            currentFont = e.target.value;
+            document.body.style.fontFamily = currentFont;
+            saveSettings();
+        });
+
+        correctColorPicker.addEventListener('change', (e) => {
+            correctColor = e.target.value;
+            updateColors();
+            saveSettings();
+        });
+
+        incorrectColorPicker.addEventListener('change', (e) => {
+            incorrectColor = e.target.value;
+            updateColors();
+            saveSettings();
+        });
+
+        decreaseFontSizeButton.addEventListener('click', () => {
+            currentFontSize = Math.max(10, currentFontSize - 5);
+            updateFontSize();
+            saveSettings();
+        });
+
+        increaseFontSizeButton.addEventListener('click', () => {
+            currentFontSize = Math.min(50, currentFontSize + 5);
+            updateFontSize();
+            saveSettings();
+        });
+
+        settingsPanel.addEventListener('click', (e) => {
+            if (e.target === settingsPanel) {
+                closeSettings();
+            }
+        });
+
+        loadSettings();
+        chooseRandomScript();
+        initializeText();
+
+        document.addEventListener('keydown', handleInput);  
+    </script>
+</body>
+</html>
